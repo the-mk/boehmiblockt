@@ -13,22 +13,30 @@
       <div style="margin-top: -2em" class="box">
       <div class="columns is-vcentered">
         <div class="column">
-          <SwitchElement property="onlyVerified" description="Nur verifizierte Accounts" v-on:changeProperty="changeProperty" />
+          <SwitchElement class="switchElement" :element=elementSwitch v-for="elementSwitch in switches" />
         </div>
-        <div class="column">
-          <SwitchElement property="excludeZero" description="Excludiere Accounts ohne Follower" v-on:changeProperty="changeProperty" />
-        </div>
-        <div class="column">
-          <DropdownElement class="is-pulled-right" />
+        <div class="column" >
+          <ul>
+          <template v-for="dropdownElement in dropdowns" >
+            <li><DropdownElement  :element="dropdownElement" /></li>
+          </template>
+          </ul>
+
         </div>
       </div>
       </div>
-      <div v-if="accounts" class="columns is-multiline">
-        <Card class="animated fadeIn" v-if="evaluateShow(account)" v-for="(account,index) in accounts" :details=showDetails :account="account" />
-      </div>
+      <template v-if="loaded">
+        <div class="columns is-multiline">
+          <Card class="animated fadeIn" v-if="evaluateShow(account)" :key="account.id" v-for="(account,index) in accounts" :account="account" />
+        </div>
+        <a @click.prevent="getMoreAccounts" v-if="page.hasMore" class="button is-fullwidth">Zeige weitere Accounts</a>
+      </template>
       <div v-else class="has-text-centered">
-        <i class="fas fa-spinner fa-spin fa-3x"></i>
+          <i class="fas fa-spinner fa-spin fa-3x"></i>
       </div>
+      
+      
+      
       </div>
     </div>
 </template>
@@ -37,24 +45,71 @@
 import Card from './components/Card.vue'
 import SwitchElement from './components/SwitchElement.vue'
 import DropdownElement from './components/DropdownElement.vue'
-import axios from 'axios'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'app',
   data () {
     return {
-      accounts: null,
-      onlyVerified: false,
-      excludeZero: false,
-      showDetails: false
+      dropdowns: {
+        SearchPropertyElement: {
+          "options": [
+            {"text": "Followers", "value": "followers_count"},
+            {"text": "Twitterbeitritt", "value": "id"}
+          ],
+          selected: null,
+          method: 'SearchProperty'
+        },
+        SearchOrderElement: {
+          "options": [
+            {"text": "Absteigend", "value": "DESC"},
+            {"text": "Aufsteigend", "value": "ASC"}
+          ],
+          selected: null,
+          method: 'SearchOrder'
+        }, 
+      },
+      switches: {
+        switchVerifiedElement: {
+          description: "Nur verifizierte Accounts",
+          method: 'OnlyVerified',
+          property: "onlyVerified",
+        },
+        switchIncludeZeroElement: {
+          description: "Accounts ohne Follower",
+          method: "IncludeZero",
+          property: "includeZero"
+        },
+        switchShowDetailsElement: {
+          description: "Details",
+          method: 'ShowDetails',
+          property: "showDetails"
+        }
+      }
     }
   },
   mounted () {
-    axios
-      .get('http://192.168.178.26/boehmAPI/public/accounts')
-      .then(response => (this.accounts = response.data.data))
+    this.getAccounts()
+  },
+  computed: {
+    ...mapGetters({
+      accounts: 'accounts/getAccounts',
+      page: 'accounts/getPage',
+      loaded: 'accounts/getLoaded',
+      searchProperty: 'accounts/getSearchProperty',
+      searchOrder: 'accounts/getSearchOrder',
+      onlyVerified: 'accounts/getOnlyVerified',
+      includeZero: 'accounts/getIncludeZero',
+      showDetails: 'accounts/getShowDetails'
+    }),
   },
   methods: {
+    ...mapActions({
+      getAccounts: 'accounts/getAccounts',
+      getMoreAccounts: 'accounts/getMoreAccounts',
+      setSearchProperty: 'accounts/setSearchProperty',
+      setSearchOrder: 'accounts/setSearchOrder'
+    }),
     accountVerified (account) {
       if (this.onlyVerified) {
         if (account === true) {
@@ -64,14 +119,11 @@ export default {
       }
       return false;
     },
-    changeProperty(value) {
-      this.$data[value] = !this.$data[value];
-    },
     evaluateShow(account) {
       if (this.onlyVerified && !account.verified) {
         return false
       }
-      if (this.excludeZero && (account.followers_count == 0)) {
+      if (!this.includeZero && (account.followers_count == 0)) {
         return false
       }
       return true
@@ -95,5 +147,10 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  padding-bottom: 2em;
+}
+
+.switchElement {
+  margin: .3em 0;
 }
 </style>

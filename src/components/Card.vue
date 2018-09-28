@@ -4,7 +4,7 @@
     <div class="card">
       <div class="card-image">
         <figure class="image is-3by1">
-          <img v-if="account.profile_use_background_image" :src="account.urls.banner_image" :alt="'Banner image of @' + account.screen_name">
+          <img v-if="account.profile_use_background_image" :src="account.urls.banner_image + '/300x100'" :alt="'Banner image of @' + account.screen_name">
           <img v-else class="banner image is-3by1" src="https://www.toptal.com/designers/subtlepatterns/patterns/bananas.png" />
         </figure>
       </div>
@@ -30,8 +30,7 @@
             <p class="subtitle is-6 is-vcentered">@{{ account.screen_name }}</p>
           </div>
         </div>
-
-        <div id="details" v-if="details" class="content">
+        <div id="details" v-if="showDetails" class="content">
           <p v-if="account.description" class="has-text-weight-bold has-text-centered">{{account.description}}</p>
           <p v-else class="is-italic has-text-centered">Kein Status</p>
           <br>
@@ -45,6 +44,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'card',
@@ -52,11 +52,11 @@ export default {
     account: {
       type: Object
     },
-    details: {
-      type: Boolean
-    }
   },
-  components: {
+  computed: {
+    ...mapGetters({
+      showDetails: 'accounts/getShowDetails'
+    }),
   },
   methods: {
     profileLink (screen_name) {
@@ -66,8 +66,6 @@ export default {
       return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
   },
-  computed: {
-  } 
 }
 </script>
 

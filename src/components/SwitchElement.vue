@@ -1,26 +1,31 @@
 <template>
     <section>
         <div class="field">
-          <input v-model="isSwitched" v-on:click="$emit('changeProperty', property)" :id="property" type="checkbox" :name="property" class="switch is-rounded is-info">
-          <label :for="property">{{ description }}</label>
+          <input v-model="isSwitched" :id="element.property" type="checkbox" :name="element.property" class="switch is-rounded is-info" @change="executeStateChange">
+          <label :for="element.property">{{ element.description }}</label>
         </div>
     </section>
 </template>
 
 <script>
-    export default {
-        props: {
-            property: {
-                type: String
-            },
-            description: {
-                type: String
-            }
-        },
-        data() {
-            return {
-                isSwitched: false
-            }
+export default {
+    props: {
+        element: {
+            type: Object
         }
+    },
+    data() {
+        return {
+            isSwitched: null
+        }
+    },
+    methods: {
+        executeStateChange () {
+            this.$store.dispatch('accounts/set' + this.element.method, this.isSwitched)
+        },
+    },
+    mounted () {
+        this.isSwitched = this.$store.getters['accounts/get' + this.element.method]
     }
+}
 </script>
