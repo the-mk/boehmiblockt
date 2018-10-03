@@ -27,7 +27,13 @@
       </div>
       <template v-if="loaded">
         <div class="columns is-multiline">
-          <Card class="animated fadeIn" v-if="evaluateShow(account)" :key="account.id" v-for="(account,index) in accounts" :account="account" />
+          <Card 
+            class="animated fadeIn" 
+            v-for="(account,index) in accounts" 
+            v-if="evaluateShow(account)" 
+            :key="account.id" 
+            :account="account" 
+          />
         </div>
         <a @click.prevent="getMoreAccounts" v-if="page.hasMore" class="button is-fullwidth">Zeige weitere Accounts</a>
       </template>
