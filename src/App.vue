@@ -25,24 +25,23 @@
         </div>
       </div>
       </div>
-      <template v-if="loaded">
+      <template>
         <div class="columns is-multiline">
           <Card 
             class="animated fadeIn" 
-            v-for="(account,index) in accounts" 
+            v-for="account in accounts" 
             v-if="evaluateShow(account)" 
             :key="account.id" 
             :account="account" 
           />
         </div>
-        <a @click.prevent="getMoreAccounts" v-if="page.hasMore" class="button is-fullwidth">Zeige weitere Accounts</a>
+        <div class="has-text-centered">
+          <a @click.prevent="getMoreAccounts" v-if="page.hasMore" class="button">
+            Zeige weitere Accounts
+            <i v-if="!loaded" style="margin-left: 15px" class="fas fa-spinner fa-spin fa-1x"></i>
+          </a>
+        </div>
       </template>
-      <div v-else class="has-text-centered">
-          <i class="fas fa-spinner fa-spin fa-3x"></i>
-      </div>
-      
-      
-      
       </div>
     </div>
 </template>
@@ -116,15 +115,6 @@ export default {
       setSearchProperty: 'accounts/setSearchProperty',
       setSearchOrder: 'accounts/setSearchOrder'
     }),
-    accountVerified (account) {
-      if (this.onlyVerified) {
-        if (account === true) {
-          return true
-        }
-        return false;
-      }
-      return false;
-    },
     evaluateShow(account) {
       if (this.onlyVerified && !account.verified) {
         return false
